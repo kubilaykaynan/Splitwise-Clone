@@ -1,0 +1,12 @@
+1- kayıt olduktan sonra storage eklemesi engellenmelidir.
+
+yapilacaklar:
+
+1- arkadaş ekleme sayfasında kullanıcı search yapabilmeli
+2- arkadas listemele sayfasinda arkadaslarinin borc bilgileri gorulmeli
+3- arkadaslari telefon rehberinden eklemesi gerekmektedir
+4- seyahet olusturulmalidir haftaya kadar
+
+borç işi olmayacak grup bazında harcama olacak.
+harcalamalara bir tip girilecek
+harcama yaparken fotoğraf eklenecek (fiş gibi)
