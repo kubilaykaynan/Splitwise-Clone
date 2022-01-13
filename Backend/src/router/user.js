@@ -3,6 +3,7 @@ const User = require("../models/Kullanicilar");
 const UserRouter = require("express").Router();
 const { compare } = require("bcryptjs");
 const Groups = require("../models/Group");
+const users_debt = require("../models/users_debt");
 
 UserRouter.post("/login", async (req, res, next) => {
   const { kullaniciAdi, sifre } = req.body;
@@ -47,7 +48,7 @@ UserRouter.get("/searchUsers", async (req, res) => {
 });
 
 UserRouter.post("/register", async (req, res) => {
-  const { adi, soyadi, email, kullaniciAdi, sifre } = req.body;
+  const { adi, soyadi, email, kullaniciAdi, sifre, phoneNumber, image } = req.body;
 
   console.log("req boyd", req.body);
   const foundUser = await User.findOne({
@@ -65,8 +66,10 @@ UserRouter.post("/register", async (req, res) => {
       surname: soyadi,
       email: email,
       password: sifre,
+      phoneNumber: phoneNumber,
+      photoUrl: image,
     });
-    res.send({
+    return res.send({
       data: newUser,
     });
   }
@@ -125,26 +128,6 @@ UserRouter.get("/users", async (req, res) => {
   });
 });
 
-// get one user
-/*UserRouter.get("/:id", async (req, res) => {
-  const { id } = req.params;
-  if (!id) {
-    res.status(399);
-    return res.json({ message: "you must provide id" });
-  }
-
-  const findAccount = User.findOne({ _id: id });
-
-  if (!findAccount) {
-    res.status(399);
-    return res.json({ message: "User not found" });
-  } else {
-    res.json({
-      ...findAccount.toObject(),
-    });
-  }
-});*/
-
 //get a friends of a user who has loged in
 UserRouter.post("/getFriends", async (req, res) => {
   const { username } = req.body;
@@ -181,14 +164,29 @@ UserRouter.post("/removeFriend", async (req, res) => {
     res.status(400);
     return res.json({ message: "User not found" });
   }
+  const toRemoveFriend = await User.findOneAndUpdate(
+    { _id: removeFriend_id },
+    { $pull: { friends: user_id } },
+    (err, data) => {
+      if (err) {
+        return res.status(500).json({ error: "error in deleting address" });
+      }
 
-  const removeFriend = User.findOneAndUpdate({ _id: user_id }, { $pull: { friends: removeFriend_id } }, (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: "error in deleting address" });
+      res.json({ message: "friend removed" });
     }
+  );
 
-    res.json({ message: "friend removed" });
-  });
+  const removeFriend = await User.findOneAndUpdate(
+    { _id: user_id },
+    { $pull: { friends: removeFriend_id } },
+    (err, data) => {
+      if (err) {
+        return res.status(500).json({ error: "error in deleting address" });
+      }
+
+      res.json({ message: "friend removed" });
+    }
+  );
 });
 
 UserRouter.post("/getGroups", async (req, res) => {
@@ -208,6 +206,176 @@ UserRouter.post("/getGroups", async (req, res) => {
     return res.json({ error: "Group not found" });
   } else {
     return res.json(foundGroups);
+  }
+});
+
+UserRouter.post("/update-user", async (req, res) => {
+  const { username, name, surname, mail, phoneNumber, image } = req.body;
+
+  console.log(req.body);
+
+  if (!username || !name || !surname || !mail || !phoneNumber) {
+    return res.status(404);
+  }
+
+  if (image) {
+    const foundUser = await User.findOneAndUpdate(
+      { phoneNumber: phoneNumber },
+      {
+        username: username,
+        name: name,
+        surname: surname,
+        email: mail,
+        phoneNumber: phoneNumber,
+        photoUrl: image,
+      },
+      { new: true }
+    );
+
+    res.status(201);
+    return res.send({
+      updatedUser: foundUser,
+    });
+  }
+  const foundUser = await User.findOneAndUpdate(
+    { phoneNumber: phoneNumber },
+    {
+      username: username,
+      name: name,
+      surname: surname,
+      email: mail,
+      phoneNumber: phoneNumber,
+      photoUrl: image,
+    },
+    { new: true }
+  );
+
+  res.status(201);
+  return res.send({
+    updatedUser: foundUser,
+  });
+});
+
+UserRouter.post("/add-friends-from-contact", async (req, res) => {
+  const { me, to } = req.body;
+
+  let numbers = [];
+
+  to.map((person) =>
+    person.phoneNumbers.map((number) => {
+      numbers.push(number.digits);
+    })
+  );
+
+  for (let index = 0; index < numbers.length; index++) {
+    const foundTo = await User.findOne({ phoneNumber: numbers[index] });
+
+    if (!foundTo) {
+      const newUser = await User.create({
+        name: to[index].name,
+        username: to[index].name,
+        surname: to[index].name,
+        email: `${to[index].name}@gmail.com`,
+        password: to[index].name,
+        phoneNumber: numbers[index],
+      });
+
+      const foundMe = await User.findOne({ _id: me });
+
+      if (!foundMe) {
+        res.status(404);
+        return res.send({ error: "user cannot found" });
+      }
+
+      const updatedMe = await User.findOneAndUpdate(
+        { _id: foundMe._id },
+        {
+          friends: [...foundMe.friends, newUser._id],
+        },
+        { new: true }
+      );
+
+      const updatedTo = await User.findOneAndUpdate(
+        { _id: newUser._id },
+        {
+          friends: [updatedMe._id],
+        },
+        { new: true }
+      );
+      res.status(201);
+      return res.send({
+        updatedMe,
+        updatedTo,
+      });
+    } else {
+      const foundMe = await User.findOne({ _id: me });
+
+      if (!foundMe) {
+        res.status(404);
+        return res.send({ error: "user cannot found" });
+      }
+
+      if (foundMe.friends.some((friend) => friend.toString() === foundTo._id.toString())) {
+        return res.status(400).send({
+          error: "You can't add friend you already have.",
+        });
+      }
+
+      const updatedMe = await User.findOneAndUpdate(
+        { _id: me },
+        {
+          friends: [...foundMe.friends, foundTo._id],
+        },
+        { new: true }
+      );
+
+      const updatedTo = await User.findOneAndUpdate(
+        { _id: foundTo._id },
+        {
+          friends: [...foundTo.friends, foundMe._id],
+        }
+      );
+
+      res.status(201);
+      return res.send({
+        updatedMe,
+        updatedTo,
+      });
+    }
+  }
+});
+
+UserRouter.post("/get-total-debts", async (req, res) => {
+  const { user_id } = req.body;
+
+  const foundUser = await User.findOne({ _id: user_id });
+
+  if (!foundUser) {
+    return res.status(400);
+  }
+
+  const getDebts = foundUser.debt;
+
+  const foundDebts = await users_debt.find({ _id: getDebts });
+
+  if (foundDebts.length > 1) {
+    const debts = foundDebts.map((item) => item.debt);
+
+    const total = debts.reduce((pre, cur) => {
+      return pre + cur;
+    }, 0);
+
+    return res.send({ total });
+  } else if (foundDebts.length == 1) {
+    res.status(201);
+    return res.send({
+      totalDebts: foundDebts.debt,
+    });
+  } else {
+    res.status(201);
+    return res.send({
+      totalDebts: 0,
+    });
   }
 });
 

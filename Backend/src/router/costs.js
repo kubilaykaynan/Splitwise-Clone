@@ -83,7 +83,7 @@ costs_Router.post("/get-cost-logs", async (req, res) => {
   }
 
   return res.send({
-    logs,
+    logs: logs.reverse(),
   });
 });
 

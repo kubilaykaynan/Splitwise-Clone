@@ -30,7 +30,7 @@ LogsRouter.post("/get-logs", async (req, res) => {
   }
 
   return res.send({
-    Logs: logs,
+    Logs: logs.reverse(),
   });
 });
 
