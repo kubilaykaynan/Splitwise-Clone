@@ -55,6 +55,7 @@ const FriendsList = (props) => {
         <ListItem.Swipeable
           onPress={() => props.onPress(item)}
           key={item._id}
+          bottomDivider
           rightContent={
             <Button
               title="Delete"
@@ -64,7 +65,7 @@ const FriendsList = (props) => {
             />
           }
         >
-          <Avatar source={{ uri: item.avatar_url }} rounded />
+          <Avatar source={{ uri: item.photoUrl }} rounded />
 
           <ListItem.Content>
             <ListItem.Title>{item.username}</ListItem.Title>

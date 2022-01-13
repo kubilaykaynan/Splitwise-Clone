@@ -18,6 +18,7 @@ import {
   Alert,
 } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import ModalPhoto from "../components/ModalPhoto";
 const LogsComment = ({ route, navigation }) => {
   const { log, groupId } = route.params;
   const [comment, setComment] = useState();
@@ -45,17 +46,20 @@ const LogsComment = ({ route, navigation }) => {
   };
 
   const modalImage = () => {
+    console.log(modalImageVisible);
     if (modalImageVisible) {
       return (
         <Modal
           visible={modalImageVisible}
-          onRequestClose={() => setModalImageVisible(modalImageVisible)}
+          onRequestClose={() => setModalImageVisible(!modalImageVisible)}
           animationType="slide"
           transparent={true}
         >
           <BackgroundImage source={{ uri: log.costPhotoUri }} style={{ flex: 1 }} />
         </Modal>
       );
+    } else {
+      return <View></View>;
     }
   };
 
@@ -86,7 +90,12 @@ const LogsComment = ({ route, navigation }) => {
   const ImageRender = () => {
     if (log.costPhotoUri) {
       return (
-        <TouchableWithoutFeedback onPress={() => setModalImageVisible(!modalImageVisible)}>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setModalImageVisible(!modalImageVisible);
+            console.log(modalImageVisible);
+          }}
+        >
           <Image
             source={{ uri: log.costPhotoUri }}
             style={{ height: 100, width: "50%", alignSelf: "center", borderRadius: 10 }}
@@ -170,6 +179,12 @@ const LogsComment = ({ route, navigation }) => {
   } else {
     return (
       <View style={styles.mainContainer}>
+        <ModalPhoto
+          visible={modalImageVisible}
+          onRequestClose={() => setModalImageVisible(!modalImageVisible)}
+          onPressHideModal={() => setModalImageVisible(!modalImageVisible)}
+          costPhotoUri={log.costPhotoUri}
+        />
         <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.pop()}>

@@ -20,7 +20,7 @@ import ContactList from "../components/ContactList";
 const AddFriends = ({ navigation }) => {
   /*
   const [searchFilter, setSearchFilter] = useState("");
-  const { user } = useContext(AuthContext);
+
   const [modalConfig, setModalConfig] = useState({
     show: false,
     selectedItem: undefined,
@@ -197,10 +197,19 @@ const AddFriends = ({ navigation }) => {
   );*/
 
   const [selectedContact, setSelectedContact] = useState([]);
+  const { user } = useContext(AuthContext);
 
   const handleAddFriend = async () => {
-    console.log(selectedContact);
     try {
+      const response = await axios.post(`${ENDPOINT_URL}/add-friends-from-contact`, {
+        me: user._id,
+        to: selectedContact,
+      });
+      if (response.status == 201) {
+        navigation.navigate("home");
+      } else {
+        Alert.alert("hata", response.data.error);
+      }
     } catch (error) {
       console.log(error);
     }

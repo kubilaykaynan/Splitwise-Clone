@@ -4,16 +4,53 @@ import { Button } from "react-native-elements/dist/buttons/Button";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Avatar from "react-native-elements/dist/avatar/Avatar";
 import GroupList from "../components/GroupList";
-
+import { AuthContext } from "../components/Contex";
+import axios from "axios";
+import { ENDPOINT_URL } from "../lib/config";
 const Gruplar = ({ accessoryProps, navigation }) => {
-  const [groupDetail, setGroupDetail] = useState();
-
+  const { user } = useContext(AuthContext);
+  const [totalDebt, setTotalDebt] = useState();
+  let isCanceled = false;
   const onPressAddGroup = () => {
     navigation.navigate("Group-add");
   };
 
-  const clickDetail = (data) => {
-    console.log(data);
+  const timeout = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  const handleChange = async () => {
+    await timeout(2000);
+    if (!isCanceled) {
+      getTotalDebt();
+    }
+  };
+
+  useEffect(() => {
+    handleChange();
+
+    return () => {
+      isCanceled = true;
+    };
+  }, []);
+
+  const getTotalDebt = async () => {
+    try {
+      const response = await axios.post(`${ENDPOINT_URL}/get-total-debts`, {
+        user_id: user._id,
+      });
+      setTotalDebt(response.data.total);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const debt = () => {
+    if (totalDebt >= 0) {
+      return <Text style={{ color: "green" }}>Alacağın borç {totalDebt}TL</Text>;
+    } else {
+      return <Text style={{ color: "red" }}>Vereceğin borç {totalDebt}TL</Text>;
+    }
   };
 
   return (
@@ -41,7 +78,7 @@ const Gruplar = ({ accessoryProps, navigation }) => {
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
               <Avatar
                 source={{
-                  uri: "https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8dmlld3xlbnwwfHwwfHw%3D&w=1000&q=80",
+                  uri: user.photoUrl,
                 }}
                 size="large"
                 rounded
@@ -59,7 +96,7 @@ const Gruplar = ({ accessoryProps, navigation }) => {
               }}
             >
               <Text style={{ fontWeight: "700" }}>Toplam Bakiye</Text>
-              <Text style={{ color: "green" }}>Borcun 0 TL</Text>
+              {debt()}
             </View>
 
             <View style={{ flex: 1, alignItems: "center" }}>

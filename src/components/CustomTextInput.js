@@ -1,5 +1,5 @@
-import React from "react"
-import { StyleSheet, TextInput, View } from "react-native"
+import React from "react";
+import { StyleSheet, TextInput, View, TouchableWithoutFeedback, Keyboard } from "react-native";
 
 const CustomTextInput = (props) => {
   return (
@@ -12,16 +12,17 @@ const CustomTextInput = (props) => {
         onChangeText={props.onChangeText}
         keyboardApperance="dark"
         secureTextEntry={props.IsPassword}
+        keyboardType={props.keyboardType}
         {...props}
       />
     </View>
-  )
-}
+  );
+};
 
 const style = StyleSheet.create({
   textInput: {
-    height: 50,
-    width: "80%",
+    height: 40,
+    width: "70%",
     backgroundColor: "#646468",
     borderRadius: 25,
     borderColor: "white",
@@ -30,6 +31,6 @@ const style = StyleSheet.create({
     marginVertical: 10,
     alignSelf: "center",
   },
-})
+});
 
-export default CustomTextInput
+export default CustomTextInput;

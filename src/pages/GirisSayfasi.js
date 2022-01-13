@@ -38,17 +38,19 @@ const GirisSayfasi = () => {
 
   return (
     <ImageBackground style={style.arkaplanResim} source={require("../assets/arkaplan4.jpg")}>
-      <View style={style.container}>
-        <CustomTextInput
-          placeholder="Kullanici Adiniz..."
-          value={kullaniciAdi}
-          onChangeText={setKullaniciAdi}
-          IsPassword={false}
-        />
-        <CustomTextInput placeholder="Sifreniz..." value={sifre} onChangeText={setSifre} IsPassword={true} />
-        <CustomButton onPress={onPressGiris} buttonName="Giris Yap" />
-        <CustomButton onPress={onPressKayitaGit} buttonName="Kayit Sayfasina Git" />
-      </View>
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        <View style={style.container}>
+          <CustomTextInput
+            placeholder="Kullanici Adiniz..."
+            value={kullaniciAdi}
+            onChangeText={setKullaniciAdi}
+            IsPassword={false}
+          />
+          <CustomTextInput placeholder="Sifreniz..." value={sifre} onChangeText={setSifre} IsPassword={true} />
+          <CustomButton onPress={onPressGiris} buttonName="Giris Yap" />
+          <CustomButton onPress={onPressKayitaGit} buttonName="Kayit Sayfasina Git" />
+        </View>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 };

@@ -38,13 +38,15 @@ const AuthContextProvider = ({ children }) => {
           await AsyncStorage.setItem("user", JSON.stringify(data));
           setUser(data);
         },
-        register: async ({ username, password, name, email, surname }) => {
+        register: async ({ username, password, name, email, surname, phoneNumber, image }) => {
           axios.post(`${ENDPOINT_URL}/register`, {
             kullaniciAdi: username,
             sifre: password,
             email,
             soyadi: surname,
             adi: name,
+            phoneNumber: phoneNumber,
+            image: image,
           });
         },
       }}

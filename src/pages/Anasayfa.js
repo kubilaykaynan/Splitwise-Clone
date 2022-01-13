@@ -14,6 +14,7 @@ const Anasayfa = ({ navigation }) => {
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
+    setAvatarURI(user.photoUrl);
     setAvatarTitle(user.name.charAt(0).toUpperCase() + user.surname.charAt(0).toUpperCase());
   }, []);
 
@@ -35,7 +36,7 @@ const Anasayfa = ({ navigation }) => {
         <View style={styles.avatar}>
           <Avatar
             rounded
-            source={avatarURI}
+            source={{ uri: avatarURI }}
             overlayContainerStyle={{ backgroundColor: "gray", position: "relative" }}
             size={50}
           />
